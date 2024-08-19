@@ -137,15 +137,13 @@ public class GhprbRootAction implements UnprotectedRootAction {
         try {
             GitHub gh = GitHub.connectAnonymously();
 
-            if (StringUtils.equalsIgnoreCase("issue_comment", event)) {
+            if (state == GHIssueState.CLOSED) {
+                LOGGER.log(Level.INFO, "Skip ''{0}'' event on closed PR", event);
+                return;
+            } else if (StringUtils.equalsIgnoreCase("issue_comment", event)) {
 
                 comment = getIssueComment(payload, gh);
                 GHIssueState state = comment.getIssue().getState();
-
-                if (state == GHIssueState.CLOSED) {
-                    LOGGER.log(Level.INFO, "Skip comment on closed PR");
-                    return;
-                }
 
                 if (!comment.getIssue().isPullRequest()) {
                     LOGGER.log(Level.INFO, "Skip comment on Issue");
